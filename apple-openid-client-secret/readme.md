@@ -9,9 +9,8 @@ All information to generate `client_secret` shall retrieved from a vault stored 
   "aud": "https://appleid.apple.com",
   "iss": "put your 10-character Team ID",
   "kid": "A 10-character key identifier generated for the Sign in with Apple private key associated with your developer account",
-  "private_key": "-----BEGIN PRIVATE KEY-----\n.....\n-----END PRIVATE KEY-----",
-  "public_key": "-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----",
   "sub": "put your app's client_id"
+  "transit_path": "transit/transit/sign/my-apple-key"
 }
 ```
 
@@ -32,9 +31,9 @@ $ ./apple-openid-client-secret/run.sh -p kv/secret
 
 ```bash
 # one liner
-$ curl -s https://raw.githubusercontent.com/eStreamSoftware/scripts/dev/apple-openid-client-secret/run.sh | VAULT_ADDR="http://127.0.0.1:8200" bash -s -- -p kv/secret
+$ curl -sL https://github.com/eStreamSoftware/scripts/raw/main/apple-openid-client-secret/run.sh | VAULT_ADDR="http://127.0.0.1:8200" bash -s -- -p kv/secret
 
 # using environment variable
 $ export VAULT_ADDR="http://127.0.0.1:8200"
-$ curl -s https://raw.githubusercontent.com/eStreamSoftware/scripts/dev/apple-openid-client-secret/run.sh | bash -s -- -p kv/secret
+$ curl -sL https://github.com/eStreamSoftware/scripts/raw/main/apple-openid-client-secret/run.sh | bash -s -- -p kv/secret
 ```

@@ -6,24 +6,6 @@ function check_command() { command -v $1 > /dev/null && return 0 || echo $1 not 
 function check_var() { [ -v $1 ] && return 0 || echo $1 not exist && exit 1; }
 function base64url() { openssl enc -base64 -A | tr '+/' '-_' | tr -d =; }
 
-function convert_ec {
-  local INPUT=$(openssl asn1parse -inform der)
-  local R=$(echo "$INPUT" | head -2 | tail -1 | cut -d':' -f4)
-  local S=$(echo "$INPUT" | head -3 | tail -1 | cut -d':' -f4)
-
-  echo -n $R | xxd -r -p
-  echo -n $S | xxd -r -p
-}
-
-function es_sign() { 
-  check_var private_key
-  local private_key_file=`mktemp`
-  echo $private_key | sed 's/\\n/\n/g' >$private_key_file
-
-  openssl dgst -binary -sha256 -sign $private_key_file | convert_ec;
-  rm $private_key_file
-}
-
 function get_jwt() {
   check_command jq
   check_command vault
@@ -33,6 +15,7 @@ function get_jwt() {
   check_var iss
   check_var sub
   check_var aud
+  check_var transit_path
 
   iat=`date +%s`
   exp=`date +%s -d "$1"`
@@ -48,7 +31,7 @@ EOF
 )
 
   local jwt_unsign="$header.$payload"
-  local jws=`echo -n "$jwt_unsign" | es_sign | base64url | cat`
+  local jws=`echo -n $jwt_unsign | base64 -w0 | vault write --field=signature $transit_path input=- marshaling_algorithm=jws | awk -F':' '{ print $3 }'`
 
   echo -n "$jwt_unsign.$jws"
 }
